@@ -27,7 +27,6 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --danger: #ef4444;
-      --input-bg: rgba(11, 17, 32, 0.9);
     }
 
     * {
@@ -67,7 +66,7 @@
       z-index: 1;
     }
 
-    /* Header Nav */
+    /* Top Nav */
     .top-nav {
       display: flex;
       justify-content: space-between;
@@ -174,7 +173,7 @@
       border-radius: 20px;
     }
 
-    /* Hero Card */
+    /* Hero Balance Card */
     .balance-card {
       background: linear-gradient(145deg, rgba(20, 30, 48, 0.95), rgba(15, 23, 42, 0.95));
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -232,7 +231,7 @@
       margin-top: 2px;
     }
 
-    /* Actions Grid */
+    /* Action Grid */
     .actions-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -253,6 +252,7 @@
       transition: all 0.25s ease;
       text-align: center;
       color: var(--text-main);
+      text-decoration: none;
     }
 
     .action-item:hover {
@@ -280,9 +280,9 @@
     .icon-withdraw { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
     .icon-task { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 
-    /* =================================================== */
-    /* SINGLE-STEP WITHDRAWAL ELIGIBILITY CARD DESIGN      */
-    /* =================================================== */
+    /* ======================================================= */
+    /* PROGRESSIVE SINGLE STEP CARD (HIDDEN FUTURE STEPS)      */
+    /* ======================================================= */
     .eligibility-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -296,7 +296,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .eligibility-header h3 {
@@ -324,14 +324,12 @@
       border: 1px solid rgba(0, 210, 106, 0.3);
     }
 
-    /* Single Step Container */
     .step-box {
       background: rgba(11, 17, 32, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: 18px;
       padding: 18px;
       position: relative;
-      overflow: hidden;
     }
 
     .step-header-info {
@@ -346,7 +344,7 @@
       font-weight: 700;
       color: var(--accent);
       background: rgba(56, 189, 248, 0.12);
-      padding: 3px 9px;
+      padding: 3px 10px;
       border-radius: 8px;
       letter-spacing: 0.5px;
     }
@@ -356,23 +354,14 @@
       font-weight: 600;
     }
 
-    .step-content {
-      animation: stepFade 0.35s ease-in-out;
-    }
-
-    @keyframes stepFade {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .step-main-title {
       font-size: 15px;
       font-weight: 700;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 9px;
-      margin-bottom: 8px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .step-main-title i {
@@ -397,7 +386,6 @@
       background: rgba(255, 255, 255, 0.08);
       border-radius: 10px;
       overflow: hidden;
-      margin-bottom: 14px;
     }
 
     .progress-fill {
@@ -405,60 +393,7 @@
       background: linear-gradient(90deg, #38bdf8, var(--primary));
       border-radius: 10px;
       width: 0%;
-      transition: width 0.5s ease;
-    }
-
-    /* Step Navigation Controls (Prev / Next & Dots) */
-    .step-controller {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .step-dots {
-      display: flex;
-      gap: 6px;
-    }
-
-    .step-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      transition: all 0.3s;
-      cursor: pointer;
-    }
-
-    .step-dot.active {
-      width: 22px;
-      border-radius: 10px;
-      background: var(--primary);
-    }
-
-    .step-nav-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-main);
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .step-nav-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .step-nav-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .btn-withdraw-action {
@@ -561,7 +496,7 @@
     <div class="live-feed-banner">
       <div class="pulse-dot"></div>
       <div class="feed-content" id="feedContent">
-        Loading live network activity...
+        Loading network activity...
       </div>
       <div class="feed-badge">LIVE</div>
     </div>
@@ -588,79 +523,67 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Action Buttons Grid -->
     <div class="actions-grid">
-      <div class="action-item" id="btnProfile">
+      <a href="profile.html" class="action-item">
         <div class="action-icon icon-profile"><i class="fa-solid fa-user"></i></div>
         <span>Profile</span>
-      </div>
-      <div class="action-item" id="btnReferral">
+      </a>
+      <a href="referral.html" class="action-item">
         <div class="action-icon icon-referral"><i class="fa-solid fa-gift"></i></div>
         <span>Referral</span>
-      </div>
-      <div class="action-item" id="btnTask">
+      </a>
+      <a href="task.html" class="action-item">
         <div class="action-icon icon-task"><i class="fa-solid fa-list-check"></i></div>
         <span>Tasks</span>
-      </div>
-      <div class="action-item" id="btnQuickWithdraw">
+      </a>
+      <a href="withdraw.html" class="action-item">
         <div class="action-icon icon-withdraw"><i class="fa-solid fa-money-bill-transfer"></i></div>
         <span>Withdraw</span>
-      </div>
+      </a>
     </div>
 
-    <!-- ONE BY ONE: Withdrawal Eligibility Section -->
+    <!-- ======================================================== -->
+    <!-- PROGRESSIVE WITHDRAWAL ELIGIBILITY (ONE STEP AT A TIME)   -->
+    <!-- ======================================================== -->
     <div class="eligibility-card">
       <div class="eligibility-header">
         <h3>Withdrawal Eligibility</h3>
         <span id="statusBadge" class="badge-status status-locked">Locked</span>
       </div>
 
-      <!-- Single Step Container -->
       <div class="step-box">
         <div class="step-header-info">
-          <span class="step-badge-indicator" id="stepIndicator">STEP 1 OF 3</span>
+          <span class="step-badge-indicator" id="stepIndicator">REQUIREMENT</span>
           <span id="stepStatusIcon" class="step-status-icon" style="color: var(--warning);">
             <i class="fa-solid fa-hourglass-half"></i> Incomplete
           </span>
         </div>
 
-        <div class="step-content" id="stepContentBox">
-          <div class="step-main-title">
-            <i id="stepIcon" class="fa-solid fa-coins"></i>
-            <span id="stepTitle">Minimum Balance</span>
-          </div>
-
-          <div class="step-progress-text">
-            <span>Progress</span>
-            <strong id="stepValues">৳0 / ৳1,000</strong>
-          </div>
-
-          <div class="progress-track">
-            <div class="progress-fill" id="stepProgressBar"></div>
-          </div>
+        <div class="step-main-title">
+          <i id="stepIcon" class="fa-solid fa-coins"></i>
+          <span id="stepTitle">Minimum Balance</span>
         </div>
 
-        <!-- Navigation buttons for stepping through -->
-        <div class="step-controller">
-          <button class="step-nav-btn" id="prevStepBtn"><i class="fa-solid fa-chevron-left"></i></button>
-          <div class="step-dots">
-            <span class="step-dot active" data-step="0"></span>
-            <span class="step-dot" data-step="1"></span>
-            <span class="step-dot" data-step="2"></span>
-          </div>
-          <button class="step-nav-btn" id="nextStepBtn"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="step-progress-text">
+          <span>Progress</span>
+          <strong id="stepValues">৳0 / ৳1,000 (0%)</strong>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" id="stepProgressBar"></div>
         </div>
       </div>
 
-      <!-- Withdraw Button (Locks until all 3 criteria are satisfied) -->
+      <!-- Action Button -->
       <button id="withdrawMainBtn" class="btn-withdraw-action" disabled>
         <i class="fa-solid fa-lock"></i>
-        <span>Complete Requirements to Withdraw</span>
+        <span id="withdrawBtnText">Complete Requirement to Unlock</span>
       </button>
     </div>
   </div>
 
-  <!-- Modal Sheet -->
+  <!-- Sheet Modal -->
   <div class="modal-overlay" id="sheetModal">
     <div class="modal-sheet">
       <div class="modal-header">
@@ -672,14 +595,13 @@
   </div>
 
   <script>
-    // Live withdrawal demo cycle announcements
+    // Live withdrawal demo ticker
     const demoWithdrawals = [
       { name: "Tanvir Ahmed", amount: "৳2,500", method: "bKash" },
       { name: "Rafiqul Islam", amount: "৳1,800", method: "Nagad" },
       { name: "Nusrat Jahan", amount: "৳3,200", method: "Rocket" },
       { name: "Mehedi Hasan", amount: "৳1,200", method: "bKash" }
     ];
-
     let currentFeedIndex = 0;
     const feedContent = document.getElementById('feedContent');
     function cycleFeed() {
@@ -689,38 +611,6 @@
     }
     cycleFeed();
     setInterval(cycleFeed, 4000);
-
-    // Current State & Eligibility steps
-    let currentUserData = null;
-    let currentStepIndex = 0;
-
-    // Step definitions
-    const stepsData = [
-      {
-        id: 'balance',
-        title: 'Minimum Balance (৳1,000)',
-        icon: 'fa-solid fa-coins',
-        goal: 1000,
-        unit: '৳',
-        isPrefix: true
-      },
-      {
-        id: 'referral',
-        title: 'Complete 20 Referrals',
-        icon: 'fa-solid fa-users',
-        goal: 20,
-        unit: '',
-        isPrefix: false
-      },
-      {
-        id: 'task',
-        title: 'Complete 400 Tasks',
-        icon: 'fa-solid fa-circle-check',
-        goal: 400,
-        unit: '',
-        isPrefix: false
-      }
-    ];
 
     // Auth Check
     auth.onAuthStateChanged(user => {
@@ -733,21 +623,19 @@
 
     function loadUserData(uid) {
       database.ref(`users/${uid}`).on('value', snapshot => {
-        if (snapshot.exists()) {
-          currentUserData = snapshot.val();
-          updateUI(currentUserData);
-        } else {
-          updateUI({
-            fullName: auth.currentUser.displayName || "User",
-            balance: 0,
-            referralCount: 0,
-            completedTasks: 0
-          });
-        }
+        const data = snapshot.val() || {};
+        updateProgressiveUI(data);
       });
     }
 
-    function updateUI(data) {
+    // =========================================================================
+    // PROGRESSIVE UNLOCK LOGIC:
+    // 1. If Balance < 1,000 -> Show ONLY Step 1 (Balance)
+    // 2. If Balance >= 1,000 AND Referrals < 20 -> Show ONLY Step 2 (Referrals)
+    // 3. If Referrals >= 20 AND Tasks < 400 -> Show ONLY Step 3 (Tasks)
+    // 4. If all 3 are completed -> Unlock Withdrawal!
+    // =========================================================================
+    function updateProgressiveUI(data) {
       const name = data.fullName || "User";
       document.getElementById('userName').textContent = name;
       document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
@@ -760,183 +648,93 @@
       document.getElementById('statReferrals').textContent = referrals;
       document.getElementById('statTasks').textContent = tasks;
 
-      // Render the current active step in the box
-      renderStep(currentStepIndex);
-
-      // Check overall eligibility
-      const isEligible = (balance >= 1000) && (referrals >= 20) && (tasks >= 400);
+      const stepIndicator = document.getElementById('stepIndicator');
+      const stepStatusIcon = document.getElementById('stepStatusIcon');
+      const stepIcon = document.getElementById('stepIcon');
+      const stepTitle = document.getElementById('stepTitle');
+      const stepValues = document.getElementById('stepValues');
+      const stepProgressBar = document.getElementById('stepProgressBar');
       const statusBadge = document.getElementById('statusBadge');
       const withdrawMainBtn = document.getElementById('withdrawMainBtn');
+      const withdrawBtnText = document.getElementById('withdrawBtnText');
 
-      if (isEligible) {
-        statusBadge.textContent = "Eligible";
-        statusBadge.className = "badge-status status-unlocked";
-        withdrawMainBtn.disabled = false;
-        withdrawMainBtn.className = "btn-withdraw-action active";
-        withdrawMainBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>Proceed to Withdraw</span>';
-      } else {
+      // Condition 1: Balance Check (< ৳1,000)
+      if (balance < 1000) {
+        const pct = Math.min(100, Math.round((balance / 1000) * 100));
+        stepIndicator.textContent = "STEP 1 OF 3";
+        stepIcon.className = "fa-solid fa-coins";
+        stepTitle.textContent = "Minimum Balance (৳1,000)";
+        stepValues.textContent = `৳${balance} / ৳1,000 (${pct}%)`;
+        stepProgressBar.style.width = pct + "%";
+
+        stepStatusIcon.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Incomplete';
+        stepStatusIcon.style.color = "var(--warning)";
         statusBadge.textContent = "Locked";
         statusBadge.className = "badge-status status-locked";
+
         withdrawMainBtn.disabled = true;
         withdrawMainBtn.className = "btn-withdraw-action";
-        withdrawMainBtn.innerHTML = '<i class="fa-solid fa-lock"></i><span>Complete Requirements to Withdraw</span>';
+        withdrawBtnText.textContent = `Need ৳${(1000 - balance).toFixed(0)} more to unlock Step 2`;
+        return;
       }
+
+      // Condition 2: Referral Check (< 20 referrals)
+      if (referrals < 20) {
+        const pct = Math.min(100, Math.round((referrals / 20) * 100));
+        stepIndicator.textContent = "STEP 2 OF 3";
+        stepIcon.className = "fa-solid fa-users";
+        stepTitle.textContent = "Complete 20 Referrals";
+        stepValues.textContent = `${referrals} / 20 (${pct}%)`;
+        stepProgressBar.style.width = pct + "%";
+
+        stepStatusIcon.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Incomplete';
+        stepStatusIcon.style.color = "var(--warning)";
+        statusBadge.textContent = "Locked";
+        statusBadge.className = "badge-status status-locked";
+
+        withdrawMainBtn.disabled = true;
+        withdrawMainBtn.className = "btn-withdraw-action";
+        withdrawBtnText.textContent = `Need ${20 - referrals} more referrals to unlock Step 3`;
+        return;
+      }
+
+      // Condition 3: Completed Tasks Check (< 400 tasks)
+      if (tasks < 400) {
+        const pct = Math.min(100, Math.round((tasks / 400) * 100));
+        stepIndicator.textContent = "STEP 3 OF 3";
+        stepIcon.className = "fa-solid fa-circle-check";
+        stepTitle.textContent = "Complete 400 Tasks";
+        stepValues.textContent = `${tasks} / 400 (${pct}%)`;
+        stepProgressBar.style.width = pct + "%";
+
+        stepStatusIcon.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Incomplete';
+        stepStatusIcon.style.color = "var(--warning)";
+        statusBadge.textContent = "Locked";
+        statusBadge.className = "badge-status status-locked";
+
+        withdrawMainBtn.disabled = true;
+        withdrawMainBtn.className = "btn-withdraw-action";
+        withdrawBtnText.textContent = `Need ${400 - tasks} more tasks to withdraw`;
+        return;
+      }
+
+      // If ALL 3 steps are complete:
+      stepIndicator.textContent = "COMPLETED";
+      stepIcon.className = "fa-solid fa-circle-check";
+      stepTitle.textContent = "All Requirements Completed!";
+      stepValues.textContent = "100% Eligible";
+      stepProgressBar.style.width = "100%";
+
+      stepStatusIcon.innerHTML = '<i class="fa-solid fa-check-double"></i> Unlocked';
+      stepStatusIcon.style.color = "var(--primary)";
+      statusBadge.textContent = "Eligible";
+      statusBadge.className = "badge-status status-unlocked";
+
+      withdrawMainBtn.disabled = false;
+      withdrawMainBtn.className = "btn-withdraw-action active";
+      withdrawMainBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>Proceed to Withdraw</span>';
+      withdrawMainBtn.onclick = () => { window.location.href = "withdraw.html"; };
     }
-
-    // Function to render single step with animation
-    function renderStep(index) {
-      if (!currentUserData) return;
-
-      const step = stepsData[index];
-      const balance = Number(currentUserData.balance || 0);
-      const referrals = Number(currentUserData.referralCount || 0);
-      const tasks = Number(currentUserData.completedTasks || 0);
-
-      let currentVal = 0;
-      if (step.id === 'balance') currentVal = balance;
-      if (step.id === 'referral') currentVal = referrals;
-      if (step.id === 'task') currentVal = tasks;
-
-      const pct = Math.min(100, Math.round((currentVal / step.goal) * 100));
-      const isCompleted = currentVal >= step.goal;
-
-      // Update indicator & title
-      document.getElementById('stepIndicator').textContent = `STEP ${index + 1} OF 3`;
-      document.getElementById('stepTitle').textContent = step.title;
-      document.getElementById('stepIcon').className = step.icon;
-
-      // Format Text
-      const curText = step.isPrefix ? `${step.unit}${currentVal}` : `${currentVal}`;
-      const goalText = step.isPrefix ? `${step.unit}${step.goal}` : `${step.goal}`;
-      document.getElementById('stepValues').textContent = `${curText} / ${goalText} (${pct}%)`;
-
-      // Status icon
-      const statusEl = document.getElementById('stepStatusIcon');
-      if (isCompleted) {
-        statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completed';
-        statusEl.style.color = 'var(--primary)';
-      } else {
-        statusEl.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Incomplete';
-        statusEl.style.color = 'var(--warning)';
-      }
-
-      // Progress bar fill
-      document.getElementById('stepProgressBar').style.width = pct + '%';
-
-      // Update active dot
-      document.querySelectorAll('.step-dot').forEach((dot, idx) => {
-        dot.classList.toggle('active', idx === index);
-      });
-
-      // Button controls
-      document.getElementById('prevStepBtn').disabled = (index === 0);
-      document.getElementById('nextStepBtn').disabled = (index === stepsData.length - 1);
-
-      // Re-trigger animation
-      const contentBox = document.getElementById('stepContentBox');
-      contentBox.style.animation = 'none';
-      contentBox.offsetHeight; // reflow
-      contentBox.style.animation = 'stepFade 0.35s ease-in-out';
-    }
-
-    // Step navigation listeners
-    document.getElementById('prevStepBtn').addEventListener('click', () => {
-      if (currentStepIndex > 0) {
-        currentStepIndex--;
-        renderStep(currentStepIndex);
-      }
-    });
-
-    document.getElementById('nextStepBtn').addEventListener('click', () => {
-      if (currentStepIndex < stepsData.length - 1) {
-        currentStepIndex++;
-        renderStep(currentStepIndex);
-      }
-    });
-
-    document.querySelectorAll('.step-dot').forEach(dot => {
-      dot.addEventListener('click', (e) => {
-        currentStepIndex = parseInt(e.target.getAttribute('data-step'));
-        renderStep(currentStepIndex);
-      });
-    });
-
-    // Modal Handling
-    const sheetModal = document.getElementById('sheetModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    const modalClose = document.getElementById('modalClose');
-
-    function openModal(title, contentHtml) {
-      modalTitle.textContent = title;
-      modalBody.innerHTML = contentHtml;
-      sheetModal.style.display = 'flex';
-    }
-
-    modalClose.addEventListener('click', () => sheetModal.style.display = 'none');
-    window.addEventListener('click', (e) => {
-      if (e.target === sheetModal) sheetModal.style.display = 'none';
-    });
-
-    document.getElementById('btnProfile').addEventListener('click', () => {
-      if (!currentUserData) return;
-      openModal("My Profile", `
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <p><strong>Name:</strong> ${currentUserData.fullName}</p>
-          <p><strong>Mobile:</strong> ${currentUserData.mobile || 'Not set'}</p>
-          <p><strong>Referral Code:</strong> <span style="color:var(--primary); font-weight:bold;">${currentUserData.referralCode || 'None'}</span></p>
-          <p><strong>Account Status:</strong> <span style="color:var(--primary)">Active</span></p>
-        </div>
-      `);
-    });
-
-    document.getElementById('btnReferral').addEventListener('click', () => {
-      if (!currentUserData) return;
-      openModal("Refer & Earn", `
-        <p style="margin-bottom:12px;">Invite friends using your unique referral code:</p>
-        <div style="background:rgba(0,0,0,0.3); padding:14px; border-radius:12px; border:1px dashed var(--card-border); text-align:center;">
-          <strong style="font-size:20px; letter-spacing:2px; color:var(--primary);">${currentUserData.referralCode || 'NONE'}</strong>
-        </div>
-        <p style="margin-top:14px; font-size:12.5px;">Completed Referrals: <strong>${currentUserData.referralCount || 0} / 20</strong></p>
-      `);
-    });
-
-    document.getElementById('btnTask').addEventListener('click', () => {
-      const uid = auth.currentUser.uid;
-      const currentTasks = (currentUserData && currentUserData.completedTasks) || 0;
-      database.ref(`users/${uid}`).update({
-        completedTasks: currentTasks + 1,
-        balance: ((currentUserData && currentUserData.balance) || 0) + 2.5
-      });
-      openModal("Task Completed", `
-        <p style="color:var(--primary); font-weight:700; margin-bottom:8px;">✓ Task Completed Successfully!</p>
-        <p>Earned: <strong>৳2.50</strong></p>
-        <p style="margin-top:8px;">Total completed tasks: <strong>${currentTasks + 1} / 400</strong></p>
-      `);
-    });
-
-    document.getElementById('btnQuickWithdraw').addEventListener('click', () => {
-      document.getElementById('withdrawMainBtn').scrollIntoView({ behavior: 'smooth' });
-    });
-
-    document.getElementById('withdrawMainBtn').addEventListener('click', () => {
-      if (!document.getElementById('withdrawMainBtn').disabled) {
-        openModal("Withdraw Request", `
-          <p style="margin-bottom:12px; color:var(--primary); font-weight:bold;">All eligibility criteria met!</p>
-          <div style="margin-bottom:12px;">
-            <label style="display:block; font-size:12px; margin-bottom:5px;">Select Gateway</label>
-            <select style="width:100%; padding:10px; border-radius:8px; background:#070a13; color:#fff; border:1px solid rgba(255,255,255,0.2);">
-              <option>bKash Personal</option>
-              <option>Nagad Personal</option>
-              <option>Rocket Personal</option>
-            </select>
-          </div>
-          <button style="width:100%; padding:12px; background:var(--primary); border:none; border-radius:10px; font-weight:700; color:#032210; cursor:pointer;" onclick="alert('Withdrawal request submitted successfully!'); document.getElementById('sheetModal').style.display='none';">
-            Confirm Withdrawal
-          </button>
-        `);
-      }
-    });
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async () => {
