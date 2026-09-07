@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Referral Network | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --warning: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Referral Code Box */
+    .referral-box {
+      background: linear-gradient(135deg, rgba(20, 30, 48, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.4);
+    }
+
+    .ref-code-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .ref-code-badge {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--primary);
+      background: rgba(0, 210, 106, 0.08);
+      border: 1px dashed var(--primary);
+      padding: 10px 18px;
+      border-radius: 14px;
+      display: inline-block;
+      margin-bottom: 16px;
+      user-select: all;
+    }
+
+    .ref-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-ref-action {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-ref-action.primary {
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      color: #032210;
+      border: none;
+      font-weight: 700;
+    }
+
+    /* 3-Level Breakdown Grid */
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .level-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .level-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    .tag-l1 { background: rgba(0, 210, 106, 0.15); color: var(--primary); }
+    .tag-l2 { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+    .tag-l3 { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+
+    .level-rate {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .level-amount {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .level-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Total Earnings Banner */
+    .total-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .total-label p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .total-label h3 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    /* Downline Segmentation */
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(11, 17, 32, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 3px;
+      margin-bottom: 14px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .downline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .downline-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .user-name {
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .user-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .bonus-tag {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-header">
+      <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <h1 class="nav-title">Referral Network</h1>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- Referral Code & Share Options -->
+    <div class="referral-box">
+      <p class="ref-code-title">Your Exclusive Referral Code</p>
+      <div class="ref-code-badge" id="refCodeDisplay">------</div>
+      <div class="ref-actions">
+        <button class="btn-ref-action" id="btnCopyCode">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy Code</span>
+        </button>
+        <button class="btn-ref-action primary" id="btnShareLink">
+          <i class="fa-solid fa-share-nodes"></i>
+          <span>Invite Link</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 3-Level Breakdown -->
+    <div class="levels-grid">
+      <div class="level-card">
+        <span class="level-tag tag-l1">Level 1</span>
+        <div class="level-rate">৳100 / referral</div>
+        <div class="level-amount" id="earnL1">৳0</div>
+        <div class="level-count" id="countL1">0 Members</div>
+      </div>
+      <div class="level-card">
+        <span class="level-tag tag-l2">Level 2</span>
+        <div class="level-rate">৳50 / referral</div>
+        <div class="level-amount" id="earnL2">৳0</div>
+        <div class="level-count" id="countL2">0 Members</div>
+      </div>
+      <div class="level-card">
+        <span class="level-tag tag-l3">Level 3</span>
+        <div class="level-rate">৳30 / referral</div>
+        <div class="level-amount" id="earnL3">৳0</div>
+        <div class="level-count" id="countL3">0 Members</div>
+      </div>
+    </div>
+
+    <!-- Total Earnings Banner -->
+    <div class="total-banner">
+      <div class="total-label">
+        <p>Total Referral Earnings</p>
+        <h3 id="totalReferralEarnings">৳0.00</h3>
+      </div>
+      <div style="font-size:26px; color: var(--primary);">
+        <i class="fa-solid fa-users-rays"></i>
+      </div>
+    </div>
+
+    <!-- Downline List -->
+    <div class="section-title">
+      <span>Referral Network Members</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-level="1">Level 1</button>
+      <button class="tab-btn" data-level="2">Level 2</button>
+      <button class="tab-btn" data-level="3">Level 3</button>
+    </div>
+
+    <div class="downline-list" id="downlineList">
+      <div class="empty-state">Loading your network...</div>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+    let myReferralCode = "";
+    let levelData = { 1: [], 2: [], 3: [] };
+    let currentTab = 1;
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        currentUserId = user.uid;
+        await loadReferralNetwork();
+      }
+    });
+
+    async function loadReferralNetwork() {
+      // 1. Get current user's referral code
+      const mySnap = await database.ref(`users/${currentUserId}`).once('value');
+      const myData = mySnap.val() || {};
+      myReferralCode = myData.referralCode || "N/A";
+      document.getElementById('refCodeDisplay').textContent = myReferralCode;
+
+      // 2. Load all users once to resolve 3-level tree cleanly
+      const allUsersSnap = await database.ref('users').once('value');
+      const allUsers = allUsersSnap.val() || {};
+
+      levelData = { 1: [], 2: [], 3: [] };
+
+      // Level 1: Users referred directly by current user
+      const l1Uids = [];
+      Object.keys(allUsers).forEach(uid => {
+        if (allUsers[uid].referredBy === currentUserId) {
+          l1Uids.push(uid);
+          levelData[1].push({ uid, ...allUsers[uid], bonus: 100 });
+        }
+      });
+
+      // Level 2: Users referred by Level 1 members
+      const l2Uids = [];
+      Object.keys(allUsers).forEach(uid => {
+        if (l1Uids.includes(allUsers[uid].referredBy)) {
+          l2Uids.push(uid);
+          levelData[2].push({ uid, ...allUsers[uid], bonus: 50 });
+        }
+      });
+
+      // Level 3: Users referred by Level 2 members
+      Object.keys(allUsers).forEach(uid => {
+        if (l2Uids.includes(allUsers[uid].referredBy)) {
+          levelData[3].push({ uid, ...allUsers[uid], bonus: 30 });
+        }
+      });
+
+      // 3. Compute earnings
+      const earnL1 = levelData[1].length * 100;
+      const earnL2 = levelData[2].length * 50;
+      const earnL3 = levelData[3].length * 30;
+      const totalEarn = earnL1 + earnL2 + earnL3;
+
+      document.getElementById('countL1').textContent = `${levelData[1].length} Members`;
+      document.getElementById('countL2').textContent = `${levelData[2].length} Members`;
+      document.getElementById('countL3').textContent = `${levelData[3].length} Members`;
+
+      document.getElementById('earnL1').textContent = `৳${earnL1}`;
+      document.getElementById('earnL2').textContent = `৳${earnL2}`;
+      document.getElementById('earnL3').textContent = `৳${earnL3}`;
+      document.getElementById('totalReferralEarnings').textContent = `৳${totalEarn.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+      renderTab(currentTab);
+    }
+
+    function renderTab(lvl) {
+      const list = document.getElementById('downlineList');
+      const members = levelData[lvl];
+
+      if (!members || members.length === 0) {
+        list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-user-group" style="font-size:24px; margin-bottom:8px; display:block;"></i>No members in Level ${lvl} yet.</div>`;
+        return;
+      }
+
+      list.innerHTML = members.map(m => {
+        const name = m.fullName || "User";
+        const initial = name.charAt(0).toUpperCase();
+        const date = m.createdAt ? new Date(m.createdAt).toLocaleDateString() : 'Active';
+        return `
+          <div class="downline-item">
+            <div class="user-meta">
+              <div class="user-avatar">${initial}</div>
+              <div>
+                <div class="user-name">${name}</div>
+                <div class="user-date">Joined: ${date}</div>
+              </div>
+            </div>
+            <div class="bonus-tag">+৳${m.bonus}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = parseInt(e.target.getAttribute('data-level'));
+        renderTab(currentTab);
+      });
+    });
+
+    // Copy Code
+    document.getElementById('btnCopyCode').addEventListener('click', () => {
+      if (!myReferralCode || myReferralCode === "N/A") return;
+      navigator.clipboard.writeText(myReferralCode).then(() => {
+        alert("Referral code copied to clipboard!");
+      });
+    });
+
+    // Share Link
+    document.getElementById('btnShareLink').addEventListener('click', () => {
+      const shareUrl = `${window.location.origin}/register.html?ref=${myReferralCode}`;
+      if (navigator.share) {
+        navigator.share({
+          title: "Join NexusPay",
+          text: `Use my referral code ${myReferralCode} to sign up!`,
+          url: shareUrl
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          alert("Invite link copied to clipboard!");
+        });
+      }
+    });
+  </script>
+</body>
+</html>
