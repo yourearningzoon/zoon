@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>User Profile | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Identity Card */
+    .profile-card {
+      background: linear-gradient(135deg, rgba(20, 30, 48, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      margin-bottom: 22px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.5);
+    }
+
+    .avatar-wrap {
+      width: 76px;
+      height: 76px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #00d26a, #0284c7);
+      margin: 0 auto 14px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .user-name {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .user-mobile {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .badge-ref-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Balance Tile */
+    .balance-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .balance-box p {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .balance-box h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    /* Statistics 2x2 Grid */
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-card .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .icon-ref { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+    .icon-ref-earn { background: rgba(0, 210, 106, 0.15); color: var(--primary); }
+    .icon-task { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .icon-task-earn { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    .stat-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* Withdrawal Summary Card */
+    .withdraw-summary-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 26px;
+    }
+
+    .withdraw-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .withdraw-header h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .withdraw-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 6px 0;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .withdraw-row:last-child {
+      border-bottom: none;
+    }
+
+    .withdraw-row strong {
+      color: #fff;
+    }
+
+    /* Logout Button */
+    .btn-logout {
+      width: 100%;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1.5px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 15px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.6);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-header">
+      <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <h1 class="nav-title">Profile</h1>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- User Profile Header -->
+    <div class="profile-card">
+      <div class="avatar-wrap" id="userInitial">U</div>
+      <h2 class="user-name" id="profileName">Loading User...</h2>
+      <p class="user-mobile" id="profileMobile">01XXXXXXXXX</p>
+      <div class="badge-ref-code">
+        <i class="fa-solid fa-gift"></i>
+        <span>CODE: <strong id="profileRefCode">------</strong></span>
+      </div>
+    </div>
+
+    <!-- Current Balance Tile -->
+    <div class="balance-box">
+      <div>
+        <p>Current Balance</p>
+        <h2 id="profileBalance">৳0.00</h2>
+      </div>
+      <div style="font-size: 28px; color: var(--primary);">
+        <i class="fa-solid fa-wallet"></i>
+      </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="section-title">Earnings & Activity Breakdown</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-ref"><i class="fa-solid fa-users"></i></div>
+        <span class="stat-label">Total Referrals</span>
+        <span class="stat-val" id="statReferrals">0</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-ref-earn"><i class="fa-solid fa-coins"></i></div>
+        <span class="stat-label">Referral Earnings</span>
+        <span class="stat-val" id="statRefEarnings">৳0.00</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-task"><i class="fa-solid fa-list-check"></i></div>
+        <span class="stat-label">Completed Tasks</span>
+        <span class="stat-val" id="statCompletedTasks">0</span>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-task-earn"><i class="fa-solid fa-chart-line"></i></div>
+        <span class="stat-label">Task Earnings</span>
+        <span class="stat-val" id="statTaskEarnings">৳0.00</span>
+      </div>
+    </div>
+
+    <!-- Total Withdrawal Information -->
+    <div class="withdraw-summary-card">
+      <div class="withdraw-header">
+        <h4>Withdrawal History Summary</h4>
+        <i class="fa-solid fa-money-bill-transfer" style="color: var(--accent);"></i>
+      </div>
+      <div class="withdraw-row">
+        <span>Total Requests</span>
+        <strong id="statWithdrawTotalCount">0</strong>
+      </div>
+      <div class="withdraw-row">
+        <span>Approved Withdrawals</span>
+        <strong id="statWithdrawApprovedAmount" style="color: var(--primary);">৳0.00</strong>
+      </div>
+      <div class="withdraw-row">
+        <span>Pending Approval</span>
+        <strong id="statWithdrawPendingAmount" style="color: var(--warning);">৳0.00</strong>
+      </div>
+    </div>
+
+    <!-- Logout Action -->
+    <button class="btn-logout" id="btnLogout">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>Log Out</span>
+    </button>
+  </div>
+
+  <script>
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        await loadFullProfile(user.uid);
+      }
+    });
+
+    async function loadFullProfile(uid) {
+      // 1. Fetch User Data
+      database.ref(`users/${uid}`).on('value', snap => {
+        const u = snap.val() || {};
+        const name = u.fullName || "User";
+        document.getElementById('profileName').textContent = name;
+        document.getElementById('userInitial').textContent = name.charAt(0).toUpperCase();
+        document.getElementById('profileMobile').textContent = u.mobile || "Mobile not set";
+        document.getElementById('profileRefCode').textContent = u.referralCode || "N/A";
+        document.getElementById('profileBalance').textContent = `৳${(parseFloat(u.balance || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+        const refCount = parseInt(u.referralCount || 0);
+        const taskCount = parseInt(u.completedTasks || 0);
+
+        document.getElementById('statReferrals').textContent = refCount;
+        document.getElementById('statCompletedTasks').textContent = taskCount;
+
+        // Calculate dynamic task earnings based on userTask records
+        database.ref(`userTasks/${uid}`).once('value', tSnap => {
+          let taskEarned = 0;
+          const userTasks = tSnap.val() || {};
+          Object.keys(userTasks).forEach(tId => {
+            if (userTasks[tId].completed) {
+              taskEarned += (parseFloat(userTasks[tId].reward || 2.5));
+            }
+          });
+          document.getElementById('statTaskEarnings').textContent = `৳${taskEarned.toFixed(2)}`;
+        });
+      });
+
+      // 2. Compute 3-Level Referral Earnings
+      database.ref('users').once('value', allSnap => {
+        const all = allSnap.val() || {};
+        let l1 = 0, l2 = 0, l3 = 0;
+        const l1Uids = [];
+        const l2Uids = [];
+
+        Object.keys(all).forEach(k => {
+          if (all[k].referredBy === uid) {
+            l1Uids.push(k);
+            l1++;
+          }
+        });
+        Object.keys(all).forEach(k => {
+          if (l1Uids.includes(all[k].referredBy)) {
+            l2Uids.push(k);
+            l2++;
+          }
+        });
+        Object.keys(all).forEach(k => {
+          if (l2Uids.includes(all[k].referredBy)) {
+            l3++;
+          }
+        });
+
+        const totalRefEarn = (l1 * 100) + (l2 * 50) + (l3 * 30);
+        document.getElementById('statRefEarnings').textContent = `৳${totalRefEarn.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      });
+
+      // 3. Compute Withdrawal History Information
+      database.ref('withdrawals').orderByChild('uid').equalTo(uid).on('value', wSnap => {
+        const wData = wSnap.val() || {};
+        let totalCount = 0;
+        let approvedSum = 0;
+        let pendingSum = 0;
+
+        Object.keys(wData).forEach(id => {
+          totalCount++;
+          const item = wData[id];
+          const amt = parseFloat(item.amount || 0);
+          if (item.status === 'approved') approvedSum += amt;
+          else if (item.status === 'pending') pendingSum += amt;
+        });
+
+        document.getElementById('statWithdrawTotalCount').textContent = `${totalCount} Requests`;
+        document.getElementById('statWithdrawApprovedAmount').textContent = `৳${approvedSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        document.getElementById('statWithdrawPendingAmount').textContent = `৳${pendingSum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      });
+    }
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      if (confirm("Are you sure you want to sign out?")) {
+        await auth.signOut();
+        window.location.replace("login.html");
+      }
+    });
+  </script>
+</body>
+</html>
