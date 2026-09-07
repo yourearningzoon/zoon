@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Withdraw Funds | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: rgba(11, 17, 32, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Balance Tile */
+    .balance-card {
+      background: linear-gradient(135deg, rgba(20, 30, 48, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .balance-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .balance-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 4px;
+    }
+
+    /* Missing Eligibility Notice */
+    .eligibility-box {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .eligibility-box.unlocked {
+      background: rgba(0, 210, 106, 0.08);
+      border-color: rgba(0, 210, 106, 0.3);
+    }
+
+    .el-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .el-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .el-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .el-item.checked {
+      color: var(--primary);
+    }
+
+    .el-item.missing {
+      color: #fca5a5;
+    }
+
+    /* Form Card */
+    .withdraw-form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .input-control, .select-control {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 13px;
+      padding: 14px;
+      color: #fff;
+      font-size: 14.5px;
+      outline: none;
+    }
+
+    .input-control:focus, .select-control:focus {
+      border-color: var(--primary);
+    }
+
+    .select-control option {
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .btn-submit-withdraw {
+      width: 100%;
+      padding: 15px;
+      border-radius: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      color: #032210;
+      box-shadow: 0 10px 25px var(--primary-glow);
+      transition: all 0.2s;
+    }
+
+    .btn-submit-withdraw:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* History List */
+    .history-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hist-meta h4 {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .hist-meta p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .status-approved { background: rgba(0, 210, 106, 0.15); color: #86efac; }
+    .status-rejected { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-header">
+      <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <h1 class="nav-title">Withdraw Funds</h1>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- Current Balance -->
+    <div class="balance-card">
+      <div>
+        <div class="balance-title">Available Balance</div>
+        <div class="balance-val">৳<span id="userBalanceDisplay">0.00</span></div>
+      </div>
+      <i class="fa-solid fa-wallet" style="font-size: 28px; color: var(--primary);"></i>
+    </div>
+
+    <!-- Missing Requirement Tracker -->
+    <div class="eligibility-box" id="eligibilityNotice">
+      <div class="el-title" id="eligibilityTitle">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Withdrawal Locked: Incomplete Criteria</span>
+      </div>
+      <div class="el-items" id="eligibilityItems"></div>
+    </div>
+
+    <!-- Withdrawal Form -->
+    <div class="withdraw-form-card">
+      <form id="withdrawForm">
+        <div class="form-group">
+          <label for="withdrawMethod">Withdrawal Method</label>
+          <select id="withdrawMethod" class="select-control" required>
+            <option value="bKash">bKash (Personal)</option>
+            <option value="Nagad">Nagad (Personal)</option>
+            <option value="Rocket">Rocket</option>
+            <option value="Upay">Upay</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="accountNumber">Account Number</label>
+          <input type="tel" id="accountNumber" class="input-control" placeholder="01XXXXXXXXX" required>
+        </div>
+
+        <div class="form-group">
+          <label for="withdrawAmount">Withdrawal Amount (Min. ৳1,000)</label>
+          <input type="number" id="withdrawAmount" class="input-control" placeholder="1000" min="1000" required>
+        </div>
+
+        <button type="submit" class="btn-submit-withdraw" id="btnSubmitWithdraw" disabled>
+          Submit Withdrawal Request
+        </button>
+      </form>
+    </div>
+
+    <!-- Withdrawal History -->
+    <div class="history-title">Withdrawal Requests</div>
+    <div class="history-list" id="historyList">
+      <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Loading history...</div>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+    let currentUser = null;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        currentUserId = user.uid;
+        initWithdrawalPage();
+      }
+    });
+
+    function initWithdrawalPage() {
+      // 1. Sync User Stats & Verification
+      database.ref(`users/${currentUserId}`).on('value', snap => {
+        currentUser = snap.val() || {};
+        const balance = parseFloat(currentUser.balance || 0);
+        const referrals = parseInt(currentUser.referralCount || 0);
+        const tasks = parseInt(currentUser.completedTasks || 0);
+
+        document.getElementById('userBalanceDisplay').textContent = balance.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+        const reqBal = balance >= 1000;
+        const reqRef = referrals >= 20;
+        const reqTask = tasks >= 400;
+        const isEligible = reqBal && reqRef && reqTask;
+
+        const noticeBox = document.getElementById('eligibilityNotice');
+        const itemsBox = document.getElementById('eligibilityItems');
+        const titleEl = document.getElementById('eligibilityTitle');
+        const submitBtn = document.getElementById('btnSubmitWithdraw');
+
+        noticeBox.style.display = 'block';
+
+        if (isEligible) {
+          noticeBox.className = 'eligibility-box unlocked';
+          titleEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--primary);"></i><span style="color:var(--primary);">You are eligible for withdrawal!</span>';
+          itemsBox.innerHTML = `
+            <div class="el-item checked"><i class="fa-solid fa-check"></i> Balance threshold achieved (৳${balance}/৳1,000)</div>
+            <div class="el-item checked"><i class="fa-solid fa-check"></i> Referrals achieved (${referrals}/20)</div>
+            <div class="el-item checked"><i class="fa-solid fa-check"></i> Tasks achieved (${tasks}/400)</div>
+          `;
+          submitBtn.disabled = false;
+        } else {
+          noticeBox.className = 'eligibility-box';
+          titleEl.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:var(--danger);"></i><span>Requirements Not Met</span>';
+
+          itemsBox.innerHTML = `
+            <div class="el-item ${reqBal ? 'checked' : 'missing'}">
+              <i class="fa-solid ${reqBal ? 'fa-check' : 'fa-xmark'}"></i>
+              Min. ৳1,000 Balance (${reqBal ? 'Satisfied' : `Need ৳${(1000 - balance).toFixed(2)} more`})
+            </div>
+            <div class="el-item ${reqRef ? 'checked' : 'missing'}">
+              <i class="fa-solid ${reqRef ? 'fa-check' : 'fa-xmark'}"></i>
+              Min. 20 Referrals (${reqRef ? 'Satisfied' : `Need ${20 - referrals} more referrals`})
+            </div>
+            <div class="el-item ${reqTask ? 'checked' : 'missing'}">
+              <i class="fa-solid ${reqTask ? 'fa-check' : 'fa-xmark'}"></i>
+              Min. 400 Completed Tasks (${reqTask ? 'Satisfied' : `Need ${400 - tasks} more tasks`})
+            </div>
+          `;
+          submitBtn.disabled = true;
+        }
+      });
+
+      // 2. Load Withdrawal History
+      database.ref('withdrawals').orderByChild('uid').equalTo(currentUserId).on('value', snap => {
+        const histBox = document.getElementById('historyList');
+        const data = snap.val() || {};
+        const items = Object.keys(data).map(k => ({ id: k, ...data[k] })).reverse();
+
+        if (items.length === 0) {
+          histBox.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">No past withdrawal requests found.</div>`;
+          return;
+        }
+
+        histBox.innerHTML = items.map(w => {
+          const dateStr = w.timestamp ? new Date(w.timestamp).toLocaleDateString() : 'Recent';
+          const status = (w.status || 'pending').toLowerCase();
+          return `
+            <div class="history-item">
+              <div class="hist-meta">
+                <h4>৳${w.amount} via ${w.method}</h4>
+                <p>${w.accountNumber} • ${dateStr}</p>
+              </div>
+              <span class="status-pill status-${status}">${status}</span>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+
+    // Handle Form Submit
+    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const method = document.getElementById('withdrawMethod').value;
+      const accountNumber = document.getElementById('accountNumber').value.trim();
+      const amount = parseFloat(document.getElementById('withdrawAmount').value);
+      const balance = parseFloat(currentUser.balance || 0);
+
+      if (amount < 1000) {
+        alert("Minimum withdrawal amount is ৳1,000.");
+        return;
+      }
+      if (amount > balance) {
+        alert("Insufficient balance for this withdrawal.");
+        return;
+      }
+
+      // Deduct balance from user
+      await database.ref(`users/${currentUserId}`).update({
+        balance: balance - amount
+      });
+
+      // Insert withdrawal request
+      await database.ref('withdrawals').push({
+        uid: currentUserId,
+        userName: currentUser.fullName || "User",
+        userMobile: currentUser.mobile || "",
+        method: method,
+        accountNumber: accountNumber,
+        amount: amount,
+        status: 'pending',
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      document.getElementById('accountNumber').value = "";
+      document.getElementById('withdrawAmount').value = "";
+      alert("Withdrawal request submitted successfully! Status is now Pending.");
+    });
+  </script>
+</body>
+</html>
