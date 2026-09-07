@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Top Performers Leaderboard | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --gold: #f59e0b;
+      --silver: #cbd5e1;
+      --bronze: #d97706;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Disclaimer / Demo Notice */
+    .demo-notice {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    /* TOP 3 PODIUM SECTION */
+    .podium-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      padding-top: 20px;
+    }
+
+    .podium-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+    .podium-avatar-wrap {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    .rank-1 .podium-avatar-wrap {
+      width: 72px;
+      height: 72px;
+      border: 2px solid var(--gold);
+      background: linear-gradient(135deg, #f59e0b, #b45309);
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+    }
+
+    .rank-2 .podium-avatar-wrap {
+      border: 2px solid var(--silver);
+      background: linear-gradient(135deg, #94a3b8, #475569);
+    }
+
+    .rank-3 .podium-avatar-wrap {
+      border: 2px solid var(--bronze);
+      background: linear-gradient(135deg, #d97706, #78350f);
+    }
+
+    .crown-icon {
+      position: absolute;
+      top: -16px;
+      font-size: 18px;
+      color: var(--gold);
+    }
+
+    .podium-rank-badge {
+      position: absolute;
+      bottom: -6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .podium-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 4px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90px;
+    }
+
+    .podium-score {
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .podium-step {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px 14px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 4px;
+      margin-top: 10px;
+    }
+
+    .rank-1 .podium-step { height: 85px; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
+    .rank-2 .podium-step { height: 65px; }
+    .rank-3 .podium-step { height: 50px; }
+
+    /* LEADERBOARD LIST */
+    .board-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .board-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.2s;
+    }
+
+    .board-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .board-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .board-rank {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-muted);
+      width: 20px;
+      text-align: center;
+    }
+
+    .board-user-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .board-user-details h4 {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .board-user-details p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .board-right {
+      text-align: right;
+    }
+
+    .board-amount {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .board-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-header">
+      <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <h1 class="nav-title">Top Performers</h1>
+      <div style="width:40px;"></div>
+    </div>
+
+    <!-- Demo Disclaimer -->
+    <div class="demo-notice">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>Live Showcase: Ranks dynamically simulate top referral milestones and withdrawal completions.</span>
+    </div>
+
+    <!-- TOP 3 PODIUM -->
+    <div class="podium-container">
+      <!-- 2nd Position -->
+      <div class="podium-item rank-2">
+        <div class="podium-avatar-wrap">
+          <span>RA</span>
+          <div class="podium-rank-badge" style="color:var(--silver);">2</div>
+        </div>
+        <div class="podium-name" id="podiumName2">Rakib_99</div>
+        <div class="podium-score" id="podiumScore2">৳18,400</div>
+        <div class="podium-step">
+          <span style="font-size: 10px; color: var(--text-muted);">48 Refs</span>
+        </div>
+      </div>
+
+      <!-- 1st Position -->
+      <div class="podium-item rank-1">
+        <i class="fa-solid fa-crown crown-icon"></i>
+        <div class="podium-avatar-wrap">
+          <span>TH</span>
+          <div class="podium-rank-badge" style="color:var(--gold);">1</div>
+        </div>
+        <div class="podium-name" id="podiumName1">Tanvir_Pro</div>
+        <div class="podium-score" id="podiumScore1">৳26,500</div>
+        <div class="podium-step">
+          <span style="font-size: 11px; font-weight:700; color: var(--gold);">64 Refs</span>
+        </div>
+      </div>
+
+      <!-- 3rd Position -->
+      <div class="podium-item rank-3">
+        <div class="podium-avatar-wrap">
+          <span>SH</span>
+          <div class="podium-rank-badge" style="color:var(--bronze);">3</div>
+        </div>
+        <div class="podium-name" id="podiumName3">Shakil_X</div>
+        <div class="podium-score" id="podiumScore3">৳14,200</div>
+        <div class="podium-step">
+          <span style="font-size: 10px; color: var(--text-muted);">39 Refs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Ranking List -->
+    <div class="board-list" id="leaderboardList">
+      <!-- Generated dynamically -->
+    </div>
+  </div>
+
+  <script>
+    // High-energy demo data showcase
+    const demoLeaderboardData = [
+      { rank: 1, name: "Tanvir_Pro", uid: "NX9801", referrals: 64, withdrawals: 9, totalPaid: "৳26,500" },
+      { rank: 2, name: "Rakib_99", uid: "NX7412", referrals: 48, withdrawals: 6, totalPaid: "৳18,400" },
+      { rank: 3, name: "Shakil_X", uid: "NX5521", referrals: 39, withdrawals: 5, totalPaid: "৳14,200" },
+      { rank: 4, name: "Nusrat_Jahan", uid: "NX4128", referrals: 34, withdrawals: 4, totalPaid: "৳11,500" },
+      { rank: 5, name: "Arif_Chowdhury", uid: "NX8923", referrals: 29, withdrawals: 4, totalPaid: "৳9,800" },
+      { rank: 6, name: "Mahmud_Hasan", uid: "NX3302", referrals: 26, withdrawals: 3, totalPaid: "৳8,400" },
+      { rank: 7, name: "Farhana_Akter", uid: "NX1944", referrals: 23, withdrawals: 3, totalPaid: "৳7,200" },
+      { rank: 8, name: "Kamrul_Islam", uid: "NX6731", referrals: 21, withdrawals: 2, totalPaid: "৳5,900" },
+      { rank: 9, name: "Sabbir_Ahmed", uid: "NX2289", referrals: 20, withdrawals: 2, totalPaid: "৳5,000" },
+      { rank: 10, name: "Mehedi_VIP", uid: "NX5014", referrals: 20, withdrawals: 2, totalPaid: "৳4,800" }
+    ];
+
+    function renderLeaderboard() {
+      // Top 3 Podium
+      document.getElementById('podiumName1').textContent = demoLeaderboardData[0].name;
+      document.getElementById('podiumScore1').textContent = demoLeaderboardData[0].totalPaid;
+
+      document.getElementById('podiumName2').textContent = demoLeaderboardData[1].name;
+      document.getElementById('podiumScore2').textContent = demoLeaderboardData[1].totalPaid;
+
+      document.getElementById('podiumName3').textContent = demoLeaderboardData[2].name;
+      document.getElementById('podiumScore3').textContent = demoLeaderboardData[2].totalPaid;
+
+      // Positions 4 to 10
+      const list = document.getElementById('leaderboardList');
+      const rest = demoLeaderboardData.slice(3);
+
+      list.innerHTML = rest.map(item => `
+        <div class="board-item">
+          <div class="board-left">
+            <span class="board-rank">#${item.rank}</span>
+            <div class="board-user-icon">${item.name.charAt(0)}</div>
+            <div class="board-user-details">
+              <h4>${item.name}</h4>
+              <p>${item.referrals} Referrals • ${item.withdrawals} Cashouts</p>
+            </div>
+          </div>
+          <div class="board-right">
+            <div class="board-amount">${item.totalPaid}</div>
+            <div class="board-sub">Withdrawn</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    renderLeaderboard();
+  </script>
+</body>
+</html>
