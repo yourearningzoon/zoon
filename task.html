@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Earn Tasks | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      background: rgba(11, 17, 32, 0.8);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 3px;
+      margin-bottom: 18px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      padding: 8px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--card-bg);
+      color: #fff;
+    }
+
+    /* Task List */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+      transition: all 0.2s;
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .task-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .task-reward {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      background: rgba(0, 210, 106, 0.1);
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+
+    .task-details {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .task-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-duration {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-task {
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      color: #032210;
+    }
+
+    .btn-cooldown {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      cursor: not-allowed;
+    }
+
+    .btn-completed {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    /* Timer Execution Overlay */
+    .timer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 7, 18, 0.9);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .timer-card {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 26px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .timer-circle {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 16px 0;
+    }
+
+    .timer-warning {
+      font-size: 12px;
+      color: var(--warning);
+      background: rgba(245, 158, 11, 0.1);
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-claim {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      color: #032210;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-header">
+      <a href="home.html" class="btn-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <h1 class="nav-title">Dynamic Tasks</h1>
+      <div style="width:40px;"></div>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="available">Available</button>
+      <button class="filter-btn" data-filter="completed">Completed</button>
+    </div>
+
+    <div class="task-list" id="taskList">
+      <div style="text-align:center; padding:30px; color:var(--text-muted);">Loading tasks...</div>
+    </div>
+  </div>
+
+  <!-- Active Task Tracking Modal -->
+  <div class="timer-overlay" id="timerOverlay">
+    <div class="timer-card">
+      <h3 id="overlayTaskName" style="font-size: 17px;">Task in Progress</h3>
+      <div class="timer-circle" id="timerSeconds">30s</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+        Please keep the sponsor page open until the timer reaches zero.
+      </p>
+      <div class="timer-warning">
+        <i class="fa-solid fa-triangle-exclamation"></i> Leaving this screen prematurely cancels the task and triggers a 10-minute cooldown.
+      </div>
+      <button class="btn-claim" id="btnClaimReward">Claim ৳0.00 Reward</button>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+    let loadedTasks = [];
+    let userTaskLogs = {};
+    let activeInterval = null;
+    let activeTask = null;
+    let currentFilter = "all";
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        currentUserId = user.uid;
+        initTasks();
+      }
+    });
+
+    function initTasks() {
+      // Listen to dynamic tasks managed in admin.html
+      database.ref('tasks').on('value', snap => {
+        const tasksObj = snap.val() || {};
+        loadedTasks = Object.keys(tasksObj)
+          .filter(k => tasksObj[k].status === 'active' || !tasksObj[k].status)
+          .map(k => ({ id: k, ...tasksObj[k] }));
+
+        // Listen to user task completion records
+        database.ref(`userTasks/${currentUserId}`).on('value', uSnap => {
+          userTaskLogs = uSnap.val() || {};
+          renderTaskList();
+        });
+      });
+    }
+
+    function renderTaskList() {
+      const listEl = document.getElementById('taskList');
+      const now = Date.now();
+
+      const filtered = loadedTasks.filter(t => {
+        const log = userTaskLogs[t.id] || {};
+        const isCompleted = log.completed === true;
+        if (currentFilter === 'available') return !isCompleted;
+        if (currentFilter === 'completed') return isCompleted;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">No tasks available in this section.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(t => {
+        const log = userTaskLogs[t.id] || {};
+        const isCompleted = log.completed === true;
+        const cooldownActive = log.cooldownUntil && log.cooldownUntil > now;
+
+        let actionBtn = `<button class="btn-task btn-start" onclick="startTask('${t.id}')">Start Task</button>`;
+
+        if (isCompleted) {
+          actionBtn = `<button class="btn-task btn-completed" disabled><i class="fa-solid fa-check"></i> Done</button>`;
+        } else if (cooldownActive) {
+          const remainingMin = Math.ceil((log.cooldownUntil - now) / 60000);
+          actionBtn = `<button class="btn-task btn-cooldown" disabled><i class="fa-regular fa-clock"></i> ${remainingMin}m Left</button>`;
+        }
+
+        return `
+          <div class="task-card">
+            <div class="task-header">
+              <span class="task-name">${t.title || 'Featured Task'}</span>
+              <span class="task-reward">+৳${t.reward || 0}</span>
+            </div>
+            <div class="task-details">${t.instructions || 'Visit the sponsor website and complete the verification timer.'}</div>
+            <div class="task-footer">
+              <span class="task-duration"><i class="fa-regular fa-clock"></i> ${t.duration || 30}s duration</span>
+              ${actionBtn}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Filter clicks
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.getAttribute('data-filter');
+        renderTaskList();
+      });
+    });
+
+    // Task Execution Flow
+    window.startTask = function(taskId) {
+      activeTask = loadedTasks.find(t => t.id === taskId);
+      if (!activeTask) return;
+
+      const duration = parseInt(activeTask.duration || 30);
+      let timeLeft = duration;
+
+      document.getElementById('overlayTaskName').textContent = activeTask.title;
+      document.getElementById('timerSeconds').textContent = `${timeLeft}s`;
+      document.getElementById('btnClaimReward').style.display = 'none';
+      document.getElementById('timerOverlay').style.display = 'flex';
+
+      // Open target task website in new window
+      if (activeTask.url) {
+        window.open(activeTask.url, '_blank');
+      }
+
+      // Early departure detection (if user leaves browser window)
+      let earlyExitTriggered = false;
+      const handleVisibilityChange = () => {
+        if (document.hidden && timeLeft > 0 && !earlyExitTriggered) {
+          earlyExitTriggered = true;
+          cancelTaskWithCooldown(taskId);
+        }
+      };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      // Countdown loop
+      clearInterval(activeInterval);
+      activeInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timerSeconds').textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(activeInterval);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+          document.getElementById('timerSeconds').textContent = "✓ Completed!";
+          const claimBtn = document.getElementById('btnClaimReward');
+          claimBtn.textContent = `Claim ৳${activeTask.reward} Reward`;
+          claimBtn.style.display = 'block';
+        }
+      }, 1000);
+    };
+
+    function cancelTaskWithCooldown(taskId) {
+      clearInterval(activeInterval);
+      document.getElementById('timerOverlay').style.display = 'none';
+      const cooldownPeriod = 10 * 60 * 1000; // 10 minutes
+
+      database.ref(`userTasks/${currentUserId}/${taskId}`).update({
+        cooldownUntil: Date.now() + cooldownPeriod
+      });
+
+      alert("Task cancelled! You left the screen before completing the required timer. A 10-minute cooldown has been applied.");
+    }
+
+    document.getElementById('btnClaimReward').addEventListener('click', async () => {
+      if (!activeTask) return;
+
+      const taskId = activeTask.id;
+      const reward = parseFloat(activeTask.reward || 0);
+
+      // 1. Mark task completed
+      await database.ref(`userTasks/${currentUserId}/${taskId}`).set({
+        completed: true,
+        completedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      // 2. Increment balance & completedTasks in user profile
+      const userRef = database.ref(`users/${currentUserId}`);
+      await userRef.transaction(curr => {
+        if (curr) {
+          curr.balance = (curr.balance || 0) + reward;
+          curr.completedTasks = (curr.completedTasks || 0) + 1;
+        }
+        return curr;
+      });
+
+      document.getElementById('timerOverlay').style.display = 'none';
+      alert(`Success! ৳${reward} credited to your balance.`);
+      activeTask = null;
+    });
+  </script>
+</body>
+</html>
