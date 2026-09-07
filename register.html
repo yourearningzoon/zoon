@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Create Account | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --input-bg: rgba(11, 17, 32, 0.9);
+      --input-border: rgba(255, 255, 255, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 360px;
+      height: 360px;
+      background: var(--primary-glow);
+      top: -100px;
+      left: -80px;
+    }
+    .orb-2 {
+      width: 320px;
+      height: 320px;
+      background: rgba(56, 189, 248, 0.22);
+      bottom: -80px;
+      right: -80px;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card-bg);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 34px 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 1;
+      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #00d26a, #008744);
+      border-radius: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+      box-shadow: 0 8px 22px var(--primary-glow);
+      margin-bottom: 12px;
+    }
+
+    .brand h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .brand p {
+      color: var(--text-muted);
+      font-size: 13.5px;
+      margin-top: 3px;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    .alert.danger {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      color: #64748b;
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .input-control {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: 13px;
+      padding: 13.5px 44px 13.5px 42px;
+      color: #fff;
+      font-size: 14.5px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .input-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 15px;
+      padding: 5px;
+    }
+
+    .toggle-password:hover {
+      color: #fff;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-muted);
+      gap: 10px;
+      font-size: 13px;
+      line-height: 1.4;
+      margin-top: 5px;
+    }
+
+    .checkbox-container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .custom-box {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      margin-top: 1px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .checkbox-container input:checked ~ .custom-box {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .custom-box i {
+      color: #000;
+      font-size: 10px;
+      opacity: 0;
+    }
+
+    .checkbox-container input:checked ~ .custom-box i {
+      opacity: 1;
+    }
+
+    .terms-link {
+      color: var(--accent);
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .terms-link:hover {
+      color: #7dd3fc;
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      color: #032210;
+      font-size: 15.5px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 25px var(--primary-glow);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(0, 210, 106, 0.45);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .footer-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      margin-left: 5px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(0,0,0,0.2);
+      border-top-color: #032210;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ================================================= */
+    /* TERMS & CONDITIONS MODAL STYLES                   */
+    /* ================================================= */
+    .terms-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .terms-modal {
+      width: 100%;
+      max-width: 580px;
+      max-height: 85vh;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
+      animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .terms-modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .terms-modal-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .terms-modal-header h2 i {
+      color: var(--primary);
+    }
+
+    .terms-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .terms-modal-close:hover {
+      color: #fff;
+    }
+
+    .terms-modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.7;
+    }
+
+    /* Custom Sleek Scrollbar */
+    .terms-modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .terms-modal-body::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .terms-modal-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+    .terms-modal-body::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    .terms-rule-item {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .terms-rule-item strong {
+      color: #fff;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .terms-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.95);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-accept-terms {
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      color: #032210;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-accept-terms:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px var(--primary-glow);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="auth-container">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-user-plus"></i>
+      </div>
+      <h1>Create Account</h1>
+      <p>Join the next-generation rewards platform</p>
+    </div>
+
+    <div id="alertBox" class="alert danger">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="alertMsg">An error occurred</span>
+    </div>
+
+    <form id="registerForm" autocomplete="off">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <div class="input-wrapper">
+            <input type="text" id="fullName" class="input-control" placeholder="John Doe" required>
+            <i class="fa-solid fa-user input-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mobile">Mobile Number</label>
+          <div class="input-wrapper">
+            <input type="tel" id="mobile" class="input-control" placeholder="01XXXXXXXXX" required>
+            <i class="fa-solid fa-phone input-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" class="input-control" placeholder="At least 6 characters" required>
+            <i class="fa-solid fa-lock input-icon"></i>
+            <span class="toggle-password" data-target="password">
+              <i class="fa-regular fa-eye"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="confirmPassword" class="input-control" placeholder="Re-enter password" required>
+            <i class="fa-solid fa-shield-halved input-icon"></i>
+            <span class="toggle-password" data-target="confirmPassword">
+              <i class="fa-regular fa-eye"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="referralCode">Referral Code (Optional)</label>
+          <div class="input-wrapper">
+            <input type="text" id="referralCode" class="input-control" placeholder="e.g. REF123456" style="text-transform: uppercase;">
+            <i class="fa-solid fa-gift input-icon"></i>
+          </div>
+        </div>
+
+        <!-- Checkbox with clickable Terms Link -->
+        <label class="checkbox-container">
+          <input type="checkbox" id="terms" required>
+          <span class="custom-box"><i class="fa-solid fa-check"></i></span>
+          <span>I agree to the <span class="terms-link" id="openTermsModal">Terms & Conditions</span> and Privacy Policy.</span>
+        </label>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span id="btnText">Create Account</span>
+          <div class="spinner" id="btnSpinner"></div>
+        </button>
+      </div>
+    </form>
+
+    <div class="footer-link">
+      Already have an account? <a href="login.html">Sign In</a>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 32+ TERMS & CONDITIONS MODAL WITH SIMULATION / FUN CLAUSE   -->
+  <!-- ============================================================ -->
+  <div class="terms-modal-overlay" id="termsModal">
+    <div class="terms-modal">
+      <div class="terms-modal-header">
+        <h2><i class="fa-solid fa-file-contract"></i> Terms of Service</h2>
+        <button class="terms-modal-close" id="closeTermsModal">&times;</button>
+      </div>
+      
+      <div class="terms-modal-body">
+        <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 18px;">
+          Please review the operational terms, user protocols, and simulation rules of the application below before proceeding with registration.
+        </p>
+
+        <div class="terms-rule-item">
+          <strong>1. Acceptance of Terms</strong>
+          By accessing or registering on this platform, you certify that you have read, understood, and agreed to be legally bound by all terms, conditions, and provisions outlined herein.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>2. Age Verification</strong>
+          Users must be at least 13 years of age or possess parental guidance to register, participate in community tasks, or access digital platform features.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>3. Account Registration & Authenticity</strong>
+          You must provide an authentic mobile identity and accurate full name during the registration procedure. Supplying fraudulent credentials constitutes immediate grounds for profile suspension.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>4. Confidentiality of Credentials</strong>
+          Account holders remain exclusively responsible for securing access passwords. The administration is not liable for unauthorized logins resulting from neglected personal safeguards.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>5. Single Account Restriction</strong>
+          Every participant is limited strictly to one account per individual device and mobile number. Creation of duplicate or mirror profiles is automatically flagged by our systems.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>6. Prohibited Automated Scripts</strong>
+          The utilization of autonomous bots, automated macros, auto-clickers, emulators, or scrapers to complete platform micro-actions is rigorously barred.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>7. Network & IP Integrity</strong>
+          Accessing this service via anonymous residential proxies, proxy chains, or virtual private network tunnels (VPNs) intending to forge multiple geolocations is restricted.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>8. Referral Program Fair Play</strong>
+          Referral invitations must be extended solely to legitimate prospective users. Fabricating fake phone numbers or employing click-farms to fulfill referral thresholds is forbidden.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>9. Anti-Self-Referral Mechanism</strong>
+          Users may not register secondary accounts through their own primary referral invitation codes. Discovered self-referrals result in permanent referral tier invalidation.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>10. Community Task Verification</strong>
+          Daily tasks, micro-actions, and interactive questionnaires undergo system auditing. Incomplete, spoofed, or artificially accelerated tasks will be voided.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>11. Platform Server Downtime</strong>
+          The administration maintains complete authority to execute scheduled database revisions, security patches, and routine server updates without prior written notification.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>12. Rebalancing of Parameters</strong>
+          All threshold limits, reward algorithms, activity caps, and points assignments are dynamic and subject to adjustments at platform discretion.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>13. User Conduct & Demeanor</strong>
+          Users agree to refrain from publishing inflammatory, abusive, defamatory, or deceptive statements regarding the service, community members, or administrators.
+        </div>
+
+        <!-- CLAUSE 14: ENTERTAINMENT, GAME & SIMULATION CLAUSE (HIDDEN IN PLAIN SIGHT) -->
+        <div class="terms-rule-item">
+          <strong>14. Entertainment, Gaming & Simulation Disclaimer</strong>
+          This application, its features, interactive tasks, and numerical counters are designed and deployed exclusively for recreation, casual gaming, and entertainment simulation purposes. All numeric balances, currency labels, or BDT (৳) symbols visualized across user interfaces serve strictly as gamified simulation points with zero real-world monetary equivalence, financial backing, or legal tender value. This platform does not operate as an investment vehicle, financial firm, commercial enterprise, or authentic earning system.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>15. Intellectual Property Protection</strong>
+          All application interfaces, custom vector graphics, color themes, software code, and textual assets are proprietary intellectual property protected by copyright legislation.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>16. Third-Party Web Links</strong>
+          The service may intermittently feature hyperlinks directing to third-party web domains. We assume neither oversight nor liability for external practices or policies.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>17. Data Synchronization Latency</strong>
+          Real-time figures, ranking updates, and statistics are synchronized across cloud database nodes. Occasional packet latency or cache discrepancies may occur.
+        </div>
+
+        <!-- CLAUSE 18: NO REAL CASH EXCHANGE VALUE -->
+        <div class="terms-rule-item">
+          <strong>18. Non-Redeemable In-App Asset Structure</strong>
+          Virtual tokens, badges, reward units, or simulated withdrawal milestones accumulated through gameplay mechanisms cannot be traded, liquidated, converted, or redeemed for tangible fiat funds or sovereign currencies. Participation remains voluntary and exploratory.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>19. Discretionary Account Revocation</strong>
+          We reserve the right to temporarily suspend, restrict, or irrevocably ban user accounts determined to have breached fairness policies or safety standards.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>20. Limitation of Liability</strong>
+          Under no scenario will the creators, developers, or server hosts be held liable for indirect, punitive, or consequential outcomes connected to user participation.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>21. Indemnity Clause</strong>
+          Users agree to indemnify and hold harmless the operators against any claims, losses, or legal liabilities arising from personal misuse of service tools.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>22. Virtual Asset Ownership</strong>
+          Any progression levels, completed quest tallies, or milestone records remain virtual game data stored in temporary server structures without property rights.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>23. Dormant Account Recycling</strong>
+          Profiles exhibiting inactivity over prolonged consecutive durations exceeding ninety (90) calendar days may have inactive balances archived or decommissioned.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>24. Force Majeure Provisions</strong>
+          Platform operations may be paused due to unavoidable circumstances including cloud hosting disruptions, power emergencies, telecommunication outages, or natural occurrences.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>25. Anti-Exploitation Protocols</strong>
+          Exploiting unintentional software bugs, packet injection, memory tampering, or layout anomalies is strictly forbidden and prompts immediate profile termination.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>26. Privacy Policy Adherence</strong>
+          Account identifiers and session records are stored in encrypted cloud repositories compliant with privacy protection conventions.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>27. Modifications to Operating Terms</strong>
+          We reserve the prerogative to revise these regulatory rules at any point. Continued platform utilization following modifications represents implied compliance.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>28. Severability Provision</strong>
+          If any individual rule or condition within this contract is deemed unenforceable by judicial authorities, remaining provisions will retain full legal force.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>29. Entirety of User Agreement</strong>
+          These published articles constitute the total understanding between participants and the application platform, superseding prior verbal agreements.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>30. Resolution of Disputes</strong>
+          Any operational controversies or interface feedback must be submitted through authorized communication channels prior to external mediation.
+        </div>
+
+        <div class="terms-rule-item">
+          <strong>31. No Warranty Express or Implied</strong>
+          The digital service is offered on an "as-is" and "as-available" platform standard without warranty or guarantee regarding permanent platform availability.
+        </div>
+
+        <div class="terms-rule-item" style="border-bottom: none;">
+          <strong>32. Final User Confirmation</strong>
+          By finishing registration, you explicitly acknowledge that you partake in this platform for leisure and entertainment simulation, accepting all procedural rules.
+        </div>
+      </div>
+
+      <div class="terms-modal-footer">
+        <button type="button" class="btn-accept-terms" id="acceptTermsBtn">I Understand & Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Terms & Conditions Modal Triggers
+    const openTermsModal = document.getElementById('openTermsModal');
+    const closeTermsModal = document.getElementById('closeTermsModal');
+    const termsModal = document.getElementById('termsModal');
+    const acceptTermsBtn = document.getElementById('acceptTermsBtn');
+    const termsCheckbox = document.getElementById('terms');
+
+    openTermsModal.addEventListener('click', (e) => {
+      e.preventDefault();
+      termsModal.style.display = 'flex';
+    });
+
+    closeTermsModal.addEventListener('click', () => {
+      termsModal.style.display = 'none';
+    });
+
+    acceptTermsBtn.addEventListener('click', () => {
+      termsCheckbox.checked = true;
+      termsModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === termsModal) {
+        termsModal.style.display = 'none';
+      }
+    });
+
+    // Password Visibility Toggles
+    document.querySelectorAll('.toggle-password').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const targetId = toggle.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const icon = toggle.querySelector('i');
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        icon.className = isPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+      });
+    });
+
+    // Form Handling
+    const registerForm = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const alertBox = document.getElementById('alertBox');
+    const alertMsg = document.getElementById('alertMsg');
+
+    function showError(msg) {
+      alertMsg.textContent = msg;
+      alertBox.style.display = 'flex';
+      setLoading(false);
+    }
+
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      if (isLoading) {
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'block';
+      } else {
+        btnText.style.display = 'block';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    function generateReferralCode() {
+      return 'NX' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const referralInput = document.getElementById('referralCode').value.trim().toUpperCase();
+      const termsAccepted = document.getElementById('terms').checked;
+
+      // Validation
+      if (!fullName) return showError("Please enter your full name.");
+      if (mobile.length < 10) return showError("Please enter a valid mobile number.");
+      if (password.length < 6) return showError("Password must be at least 6 characters.");
+      if (password !== confirmPassword) return showError("Passwords do not match.");
+      if (!termsAccepted) return showError("You must agree to the Terms & Conditions.");
+
+      setLoading(true);
+
+      try {
+        const systemEmail = phoneToEmail(mobile);
+        let referrerUid = null;
+
+        if (referralInput) {
+          const refQuery = await database.ref('users')
+            .orderByChild('referralCode')
+            .equalTo(referralInput)
+            .once('value');
+
+          if (!refQuery.exists()) {
+            showError("Invalid referral code entered. Leave blank if none.");
+            return;
+          } else {
+            referrerUid = Object.keys(refQuery.val())[0];
+          }
+        }
+
+        const userCredential = await auth.createUserWithEmailAndPassword(systemEmail, password);
+        const user = userCredential.user;
+
+        await user.updateProfile({ displayName: fullName });
+
+        const myReferralCode = generateReferralCode();
+
+        const userData = {
+          uid: user.uid,
+          fullName: fullName,
+          mobile: mobile,
+          email: systemEmail,
+          referralCode: myReferralCode,
+          referredBy: referrerUid || null,
+          balance: 0,
+          referralCount: 0,
+          completedTasks: 0,
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        await database.ref(`users/${user.uid}`).set(userData);
+
+        if (referrerUid) {
+          const referrerRef = database.ref(`users/${referrerUid}`);
+          await referrerRef.transaction((currentData) => {
+            if (currentData) {
+              currentData.referralCount = (currentData.referralCount || 0) + 1;
+              currentData.balance = (currentData.balance || 0) + 50;
+            }
+            return currentData;
+          });
+        }
+
+        window.location.href = "home.html";
+
+      } catch (err) {
+        console.error(err);
+        if (err.code === 'auth/email-already-in-use') {
+          showError("An account with this mobile number already exists.");
+        } else {
+          showError(err.message || "Failed to create account. Try again.");
+        }
+      }
+    });
+  </script>
+</body>
+</html>
