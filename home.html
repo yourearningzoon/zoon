@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dashboard | NexusPay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a13;
+      --card-bg: rgba(18, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #00d26a;
+      --primary-glow: rgba(0, 210, 106, 0.35);
+      --accent: #38bdf8;
+      --warning: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --input-bg: rgba(11, 17, 32, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 50px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .glow-header {
+      position: absolute;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(0, 210, 106, 0.25) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header Nav */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .user-greeting {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    .greeting-text h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .greeting-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-icon-nav {
+      width: 40px;
+      height: 40px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon-nav:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Live Feed Card */
+    .live-feed-banner {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 16px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 0 rgba(0, 210, 106, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(0, 210, 106, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0); }
+    }
+
+    .feed-content {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .feed-content strong {
+      color: #fff;
+    }
+
+    .feed-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(0, 210, 106, 0.12);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    /* Hero Card */
+    .balance-card {
+      background: linear-gradient(145deg, rgba(20, 30, 48, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 24px 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 22px;
+    }
+
+    .balance-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .balance-value {
+      font-size: 38px;
+      font-weight: 800;
+      color: #fff;
+      margin: 10px 0 16px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .balance-value .currency {
+      font-size: 26px;
+      color: var(--primary);
+    }
+
+    .balance-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .b-stat h4 {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .b-stat p {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* Actions Grid */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .action-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: center;
+      color: var(--text-main);
+    }
+
+    .action-item:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .action-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .action-item span {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .icon-profile { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+    .icon-referral { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .icon-withdraw { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .icon-task { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    /* =================================================== */
+    /* SINGLE-STEP WITHDRAWAL ELIGIBILITY CARD DESIGN      */
+    /* =================================================== */
+    .eligibility-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 22px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .eligibility-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .eligibility-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .badge-status {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-locked {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-unlocked {
+      background: rgba(0, 210, 106, 0.15);
+      color: #86efac;
+      border: 1px solid rgba(0, 210, 106, 0.3);
+    }
+
+    /* Single Step Container */
+    .step-box {
+      background: rgba(11, 17, 32, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .step-badge-indicator {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 3px 9px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .step-status-icon {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .step-content {
+      animation: stepFade 0.35s ease-in-out;
+    }
+
+    @keyframes stepFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-main-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 8px;
+    }
+
+    .step-main-title i {
+      color: var(--primary);
+    }
+
+    .step-progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .step-progress-text strong {
+      color: #fff;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, var(--primary));
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    /* Step Navigation Controls (Prev / Next & Dots) */
+    .step-controller {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .step-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .step-dot.active {
+      width: 22px;
+      border-radius: 10px;
+      background: var(--primary);
+    }
+
+    .step-nav-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .step-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .step-nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-withdraw-action {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
+      border-radius: 14px;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s;
+    }
+
+    .btn-withdraw-action:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    .btn-withdraw-action.active {
+      background: linear-gradient(135deg, #00d26a, #00ab55);
+      color: #032210;
+      box-shadow: 0 8px 25px var(--primary-glow);
+    }
+
+    /* Sheet Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 480px;
+      background: #111827;
+      border-top-left-radius: 26px;
+      border-top-right-radius: 26px;
+      border: 1px solid var(--card-border);
+      padding: 24px 22px 34px 22px;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-header"></div>
+
+  <div class="container">
+    <!-- Top Nav -->
+    <div class="top-nav">
+      <div class="user-greeting">
+        <div class="avatar" id="userAvatar">U</div>
+        <div class="greeting-text">
+          <p>Welcome back,</p>
+          <h3 id="userName">Nexus User</h3>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-icon-nav" id="logoutBtn" title="Logout">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Announcement -->
+    <div class="live-feed-banner">
+      <div class="pulse-dot"></div>
+      <div class="feed-content" id="feedContent">
+        Loading live network activity...
+      </div>
+      <div class="feed-badge">LIVE</div>
+    </div>
+
+    <!-- Balance Hero Card -->
+    <div class="balance-card">
+      <div class="balance-label">
+        <span>Current Balance</span>
+        <i class="fa-solid fa-wallet" style="color: var(--primary);"></i>
+      </div>
+      <div class="balance-value">
+        <span class="currency">৳</span>
+        <span id="balanceDisplay">0.00</span>
+      </div>
+      <div class="balance-stats">
+        <div class="b-stat">
+          <h4>Total Referrals</h4>
+          <p id="statReferrals">0</p>
+        </div>
+        <div class="b-stat">
+          <h4>Completed Tasks</h4>
+          <p id="statTasks">0</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions-grid">
+      <div class="action-item" id="btnProfile">
+        <div class="action-icon icon-profile"><i class="fa-solid fa-user"></i></div>
+        <span>Profile</span>
+      </div>
+      <div class="action-item" id="btnReferral">
+        <div class="action-icon icon-referral"><i class="fa-solid fa-gift"></i></div>
+        <span>Referral</span>
+      </div>
+      <div class="action-item" id="btnTask">
+        <div class="action-icon icon-task"><i class="fa-solid fa-list-check"></i></div>
+        <span>Tasks</span>
+      </div>
+      <div class="action-item" id="btnQuickWithdraw">
+        <div class="action-icon icon-withdraw"><i class="fa-solid fa-money-bill-transfer"></i></div>
+        <span>Withdraw</span>
+      </div>
+    </div>
+
+    <!-- ONE BY ONE: Withdrawal Eligibility Section -->
+    <div class="eligibility-card">
+      <div class="eligibility-header">
+        <h3>Withdrawal Eligibility</h3>
+        <span id="statusBadge" class="badge-status status-locked">Locked</span>
+      </div>
+
+      <!-- Single Step Container -->
+      <div class="step-box">
+        <div class="step-header-info">
+          <span class="step-badge-indicator" id="stepIndicator">STEP 1 OF 3</span>
+          <span id="stepStatusIcon" class="step-status-icon" style="color: var(--warning);">
+            <i class="fa-solid fa-hourglass-half"></i> Incomplete
+          </span>
+        </div>
+
+        <div class="step-content" id="stepContentBox">
+          <div class="step-main-title">
+            <i id="stepIcon" class="fa-solid fa-coins"></i>
+            <span id="stepTitle">Minimum Balance</span>
+          </div>
+
+          <div class="step-progress-text">
+            <span>Progress</span>
+            <strong id="stepValues">৳0 / ৳1,000</strong>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" id="stepProgressBar"></div>
+          </div>
+        </div>
+
+        <!-- Navigation buttons for stepping through -->
+        <div class="step-controller">
+          <button class="step-nav-btn" id="prevStepBtn"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="step-dots">
+            <span class="step-dot active" data-step="0"></span>
+            <span class="step-dot" data-step="1"></span>
+            <span class="step-dot" data-step="2"></span>
+          </div>
+          <button class="step-nav-btn" id="nextStepBtn"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Withdraw Button (Locks until all 3 criteria are satisfied) -->
+      <button id="withdrawMainBtn" class="btn-withdraw-action" disabled>
+        <i class="fa-solid fa-lock"></i>
+        <span>Complete Requirements to Withdraw</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Sheet -->
+  <div class="modal-overlay" id="sheetModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modalTitle">Details</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div id="modalBody" style="font-size: 14px; color: var(--text-muted); line-height: 1.6;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Live withdrawal demo cycle announcements
+    const demoWithdrawals = [
+      { name: "Tanvir Ahmed", amount: "৳2,500", method: "bKash" },
+      { name: "Rafiqul Islam", amount: "৳1,800", method: "Nagad" },
+      { name: "Nusrat Jahan", amount: "৳3,200", method: "Rocket" },
+      { name: "Mehedi Hasan", amount: "৳1,200", method: "bKash" }
+    ];
+
+    let currentFeedIndex = 0;
+    const feedContent = document.getElementById('feedContent');
+    function cycleFeed() {
+      const item = demoWithdrawals[currentFeedIndex];
+      feedContent.innerHTML = `<strong>${item.name}</strong> just withdrew <strong>${item.amount}</strong> via ${item.method}`;
+      currentFeedIndex = (currentFeedIndex + 1) % demoWithdrawals.length;
+    }
+    cycleFeed();
+    setInterval(cycleFeed, 4000);
+
+    // Current State & Eligibility steps
+    let currentUserData = null;
+    let currentStepIndex = 0;
+
+    // Step definitions
+    const stepsData = [
+      {
+        id: 'balance',
+        title: 'Minimum Balance (৳1,000)',
+        icon: 'fa-solid fa-coins',
+        goal: 1000,
+        unit: '৳',
+        isPrefix: true
+      },
+      {
+        id: 'referral',
+        title: 'Complete 20 Referrals',
+        icon: 'fa-solid fa-users',
+        goal: 20,
+        unit: '',
+        isPrefix: false
+      },
+      {
+        id: 'task',
+        title: 'Complete 400 Tasks',
+        icon: 'fa-solid fa-circle-check',
+        goal: 400,
+        unit: '',
+        isPrefix: false
+      }
+    ];
+
+    // Auth Check
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.replace("login.html");
+      } else {
+        loadUserData(user.uid);
+      }
+    });
+
+    function loadUserData(uid) {
+      database.ref(`users/${uid}`).on('value', snapshot => {
+        if (snapshot.exists()) {
+          currentUserData = snapshot.val();
+          updateUI(currentUserData);
+        } else {
+          updateUI({
+            fullName: auth.currentUser.displayName || "User",
+            balance: 0,
+            referralCount: 0,
+            completedTasks: 0
+          });
+        }
+      });
+    }
+
+    function updateUI(data) {
+      const name = data.fullName || "User";
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+
+      const balance = Number(data.balance || 0);
+      const referrals = Number(data.referralCount || 0);
+      const tasks = Number(data.completedTasks || 0);
+
+      document.getElementById('balanceDisplay').textContent = balance.toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('statReferrals').textContent = referrals;
+      document.getElementById('statTasks').textContent = tasks;
+
+      // Render the current active step in the box
+      renderStep(currentStepIndex);
+
+      // Check overall eligibility
+      const isEligible = (balance >= 1000) && (referrals >= 20) && (tasks >= 400);
+      const statusBadge = document.getElementById('statusBadge');
+      const withdrawMainBtn = document.getElementById('withdrawMainBtn');
+
+      if (isEligible) {
+        statusBadge.textContent = "Eligible";
+        statusBadge.className = "badge-status status-unlocked";
+        withdrawMainBtn.disabled = false;
+        withdrawMainBtn.className = "btn-withdraw-action active";
+        withdrawMainBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>Proceed to Withdraw</span>';
+      } else {
+        statusBadge.textContent = "Locked";
+        statusBadge.className = "badge-status status-locked";
+        withdrawMainBtn.disabled = true;
+        withdrawMainBtn.className = "btn-withdraw-action";
+        withdrawMainBtn.innerHTML = '<i class="fa-solid fa-lock"></i><span>Complete Requirements to Withdraw</span>';
+      }
+    }
+
+    // Function to render single step with animation
+    function renderStep(index) {
+      if (!currentUserData) return;
+
+      const step = stepsData[index];
+      const balance = Number(currentUserData.balance || 0);
+      const referrals = Number(currentUserData.referralCount || 0);
+      const tasks = Number(currentUserData.completedTasks || 0);
+
+      let currentVal = 0;
+      if (step.id === 'balance') currentVal = balance;
+      if (step.id === 'referral') currentVal = referrals;
+      if (step.id === 'task') currentVal = tasks;
+
+      const pct = Math.min(100, Math.round((currentVal / step.goal) * 100));
+      const isCompleted = currentVal >= step.goal;
+
+      // Update indicator & title
+      document.getElementById('stepIndicator').textContent = `STEP ${index + 1} OF 3`;
+      document.getElementById('stepTitle').textContent = step.title;
+      document.getElementById('stepIcon').className = step.icon;
+
+      // Format Text
+      const curText = step.isPrefix ? `${step.unit}${currentVal}` : `${currentVal}`;
+      const goalText = step.isPrefix ? `${step.unit}${step.goal}` : `${step.goal}`;
+      document.getElementById('stepValues').textContent = `${curText} / ${goalText} (${pct}%)`;
+
+      // Status icon
+      const statusEl = document.getElementById('stepStatusIcon');
+      if (isCompleted) {
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completed';
+        statusEl.style.color = 'var(--primary)';
+      } else {
+        statusEl.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Incomplete';
+        statusEl.style.color = 'var(--warning)';
+      }
+
+      // Progress bar fill
+      document.getElementById('stepProgressBar').style.width = pct + '%';
+
+      // Update active dot
+      document.querySelectorAll('.step-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === index);
+      });
+
+      // Button controls
+      document.getElementById('prevStepBtn').disabled = (index === 0);
+      document.getElementById('nextStepBtn').disabled = (index === stepsData.length - 1);
+
+      // Re-trigger animation
+      const contentBox = document.getElementById('stepContentBox');
+      contentBox.style.animation = 'none';
+      contentBox.offsetHeight; // reflow
+      contentBox.style.animation = 'stepFade 0.35s ease-in-out';
+    }
+
+    // Step navigation listeners
+    document.getElementById('prevStepBtn').addEventListener('click', () => {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        renderStep(currentStepIndex);
+      }
+    });
+
+    document.getElementById('nextStepBtn').addEventListener('click', () => {
+      if (currentStepIndex < stepsData.length - 1) {
+        currentStepIndex++;
+        renderStep(currentStepIndex);
+      }
+    });
+
+    document.querySelectorAll('.step-dot').forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        currentStepIndex = parseInt(e.target.getAttribute('data-step'));
+        renderStep(currentStepIndex);
+      });
+    });
+
+    // Modal Handling
+    const sheetModal = document.getElementById('sheetModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalClose = document.getElementById('modalClose');
+
+    function openModal(title, contentHtml) {
+      modalTitle.textContent = title;
+      modalBody.innerHTML = contentHtml;
+      sheetModal.style.display = 'flex';
+    }
+
+    modalClose.addEventListener('click', () => sheetModal.style.display = 'none');
+    window.addEventListener('click', (e) => {
+      if (e.target === sheetModal) sheetModal.style.display = 'none';
+    });
+
+    document.getElementById('btnProfile').addEventListener('click', () => {
+      if (!currentUserData) return;
+      openModal("My Profile", `
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <p><strong>Name:</strong> ${currentUserData.fullName}</p>
+          <p><strong>Mobile:</strong> ${currentUserData.mobile || 'Not set'}</p>
+          <p><strong>Referral Code:</strong> <span style="color:var(--primary); font-weight:bold;">${currentUserData.referralCode || 'None'}</span></p>
+          <p><strong>Account Status:</strong> <span style="color:var(--primary)">Active</span></p>
+        </div>
+      `);
+    });
+
+    document.getElementById('btnReferral').addEventListener('click', () => {
+      if (!currentUserData) return;
+      openModal("Refer & Earn", `
+        <p style="margin-bottom:12px;">Invite friends using your unique referral code:</p>
+        <div style="background:rgba(0,0,0,0.3); padding:14px; border-radius:12px; border:1px dashed var(--card-border); text-align:center;">
+          <strong style="font-size:20px; letter-spacing:2px; color:var(--primary);">${currentUserData.referralCode || 'NONE'}</strong>
+        </div>
+        <p style="margin-top:14px; font-size:12.5px;">Completed Referrals: <strong>${currentUserData.referralCount || 0} / 20</strong></p>
+      `);
+    });
+
+    document.getElementById('btnTask').addEventListener('click', () => {
+      const uid = auth.currentUser.uid;
+      const currentTasks = (currentUserData && currentUserData.completedTasks) || 0;
+      database.ref(`users/${uid}`).update({
+        completedTasks: currentTasks + 1,
+        balance: ((currentUserData && currentUserData.balance) || 0) + 2.5
+      });
+      openModal("Task Completed", `
+        <p style="color:var(--primary); font-weight:700; margin-bottom:8px;">✓ Task Completed Successfully!</p>
+        <p>Earned: <strong>৳2.50</strong></p>
+        <p style="margin-top:8px;">Total completed tasks: <strong>${currentTasks + 1} / 400</strong></p>
+      `);
+    });
+
+    document.getElementById('btnQuickWithdraw').addEventListener('click', () => {
+      document.getElementById('withdrawMainBtn').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    document.getElementById('withdrawMainBtn').addEventListener('click', () => {
+      if (!document.getElementById('withdrawMainBtn').disabled) {
+        openModal("Withdraw Request", `
+          <p style="margin-bottom:12px; color:var(--primary); font-weight:bold;">All eligibility criteria met!</p>
+          <div style="margin-bottom:12px;">
+            <label style="display:block; font-size:12px; margin-bottom:5px;">Select Gateway</label>
+            <select style="width:100%; padding:10px; border-radius:8px; background:#070a13; color:#fff; border:1px solid rgba(255,255,255,0.2);">
+              <option>bKash Personal</option>
+              <option>Nagad Personal</option>
+              <option>Rocket Personal</option>
+            </select>
+          </div>
+          <button style="width:100%; padding:12px; background:var(--primary); border:none; border-radius:10px; font-weight:700; color:#032210; cursor:pointer;" onclick="alert('Withdrawal request submitted successfully!'); document.getElementById('sheetModal').style.display='none';">
+            Confirm Withdrawal
+          </button>
+        `);
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      if (confirm("Are you sure you want to log out?")) {
+        await auth.signOut();
+        window.location.replace("login.html");
+      }
+    });
+  </script>
+</body>
+</html>
